@@ -1,11 +1,12 @@
 package com.jpahybernatepractice.jpa_hybernate_practice.Controller;
 
 import com.jpahybernatepractice.jpa_hybernate_practice.DTO.ProductDto;
+import com.jpahybernatepractice.jpa_hybernate_practice.Service.ProductPaginationService;
 import com.jpahybernatepractice.jpa_hybernate_practice.Service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductController {
 private final ProductService productService;
+private final ProductPaginationService productPaginationService;
 
 // Create Product.
 @PostMapping("/create")
@@ -30,6 +32,19 @@ private final ProductService productService;
     public ResponseEntity<List<ProductDto>> getAllProductsDesc(){
     List<ProductDto> allProducts = productService.getAllProductsDesc();
     return new ResponseEntity<>(allProducts, HttpStatus.OK);
+    }
+
+    //Get all product using Paination
+    // PAGINATION API
+    // localhost:8080/products/paged?page=0&size=3&sortBy=price&direction=desc
+    @GetMapping("/paged")
+    public Page<ProductDto> getAllProductPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ){
+    return productPaginationService.getAllProducts(page, size, sortBy, direction);
     }
 
     //localhost:8080/products/title?title=Delta Treats
