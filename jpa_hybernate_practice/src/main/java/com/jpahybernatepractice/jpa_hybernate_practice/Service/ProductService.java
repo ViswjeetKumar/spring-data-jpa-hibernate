@@ -1,18 +1,21 @@
 package com.jpahybernatepractice.jpa_hybernate_practice.Service;
 
 
+import com.jpahybernatepractice.jpa_hybernate_practice.DTO.GetTitlePriceOnly;
+import com.jpahybernatepractice.jpa_hybernate_practice.DTO.IProductDto;
 import com.jpahybernatepractice.jpa_hybernate_practice.DTO.ProductDto;
 import com.jpahybernatepractice.jpa_hybernate_practice.Entity.ProductEntity;
 import com.jpahybernatepractice.jpa_hybernate_practice.Repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -74,5 +77,58 @@ private  final ModelMapper mapper;
                 .stream()
                 .map(prod->mapper.map(prod, ProductDto.class))
                 .toList();
+    }
+
+    public Page<ProductDto> getAllProductsSortedBy(int page, int PAGE_SIZE, String sortBy) {
+        Sort sort = Sort.by(Sort.Order.desc(sortBy),
+                Sort.Order.desc("price"),
+                Sort.Order.desc("quantity")
+                );
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE, sort);
+        Page<ProductEntity> productPage = productRepository.findAll(pageable);
+
+//        List<ProductEntity> products = productRepository.findBy(Sort.by(Sort.Direction.DESC, sortBy, "price", "quantity"));
+//        List<ProductEntity> products = productRepository.findBy(
+//                Sort.by(Sort.Order.desc(sortBy),
+//                        Sort.Order.desc("price"),
+//                        Sort.Order.desc("quantity")
+//                ));
+        return productPage
+                .map(prod->mapper.map(prod, ProductDto.class));
+    }
+
+    public List<IProductDto> getFewDetails() {
+        return productRepository.findBy();
+    }
+
+    public Page<GetTitlePriceOnly> getTitlePriceAll(
+            int page,
+            int size,
+            String sortedBy,
+            String orderIn
+    ) {
+        Sort sort = Sort.by(Sort.Order.desc(sortedBy),
+                Sort.Order.desc("price")
+                );
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<ProductEntity> pageList = productRepository.findAll(pageable);
+        // Entity to DTO Conversion
+//        List<GetTitlePriceOnly> DtoPage = pageList
+//                .getContent()
+//                .stream()
+//                .map(prod-> new GetTitlePriceOnly(
+//                        prod.getTitle(),
+//                        prod.getPrice()
+//                ))
+//                .collect(Collectors.toList());
+//        );
+
+        return pageList.map(prod-> new GetTitlePriceOnly(
+                prod.getTitle(),
+                prod.getPrice()
+        ));
+
     }
 }

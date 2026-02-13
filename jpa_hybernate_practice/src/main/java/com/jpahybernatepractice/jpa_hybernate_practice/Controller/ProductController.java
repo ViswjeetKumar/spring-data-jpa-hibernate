@@ -1,5 +1,7 @@
 package com.jpahybernatepractice.jpa_hybernate_practice.Controller;
 
+import com.jpahybernatepractice.jpa_hybernate_practice.DTO.GetTitlePriceOnly;
+import com.jpahybernatepractice.jpa_hybernate_practice.DTO.IProductDto;
 import com.jpahybernatepractice.jpa_hybernate_practice.DTO.ProductDto;
 import com.jpahybernatepractice.jpa_hybernate_practice.Service.ProductPaginationService;
 import com.jpahybernatepractice.jpa_hybernate_practice.Service.ProductService;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.security.PrivateKey;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -20,12 +23,24 @@ public class ProductController {
 private final ProductService productService;
 private final ProductPaginationService productPaginationService;
 
+private static final int PAGE_SIZE=5;
+
 // Create Product.
 @PostMapping("/create")
     public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto){
     ProductDto product = productService.createProduct(productDto);
     return new ResponseEntity<>(product, HttpStatus.CREATED);
 }
+
+//Get all product shorted by given fields.
+    @GetMapping("/sort")
+    public ResponseEntity<List<ProductDto>> getFilteredData(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "id") String sortBy
+    ){
+    Page<ProductDto> sortedProducts = productService.getAllProductsSortedBy(page, PAGE_SIZE, sortBy );
+    return ResponseEntity.ok(sortedProducts.getContent());
+    }
 
 // Get All Products.
     @GetMapping
@@ -87,5 +102,19 @@ private final ProductPaginationService productPaginationService;
     return ResponseEntity.ok(productsBetween);
 }
 
+@GetMapping("/only")
+    public ResponseEntity<List<IProductDto>> getFewDetails(){
+    return ResponseEntity.ok(productService.getFewDetails());
+}
+
+@GetMapping("/getTitlePrice")
+    public ResponseEntity<Page<GetTitlePriceOnly>> getTitlePriceAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "title") String sortedBy,
+            @RequestParam(defaultValue = "desc") String orderIn
+){
+    return new ResponseEntity<>(productService.getTitlePriceAll(page, size, sortedBy, orderIn), HttpStatus.OK);
+}
 
 }

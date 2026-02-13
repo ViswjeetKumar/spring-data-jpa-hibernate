@@ -1,9 +1,11 @@
 package com.jpahybernatepractice.jpa_hybernate_practice.Repositories;
 
+import com.jpahybernatepractice.jpa_hybernate_practice.DTO.IProductDto;
 import com.jpahybernatepractice.jpa_hybernate_practice.Entity.ProductEntity;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -44,4 +46,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     @Transactional
     @Query("delete from ProductEntity p where sku=:sku ")
     void deleteBySku(String sku);
+
+    @Query("select p.sku as sku, p.title as title, p.price as price from ProductEntity p")
+    List<IProductDto> findBy();
+
+
 }
